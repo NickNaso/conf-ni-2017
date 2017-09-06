@@ -18,4 +18,10 @@
 
 'use strict'
 
-module.exports = require('./lib')
+const myModule = require('../')
+
+describe("Test myModule", function () {
+    it('Should return text equal to Hello World!', function () {
+        expect(myModule.hello()).toEqual('Hello World!')
+    })
+})

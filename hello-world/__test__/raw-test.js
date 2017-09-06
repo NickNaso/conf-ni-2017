@@ -18,4 +18,6 @@
 
 'use strict'
 
-module.exports = require('./lib')
+const myModule = require('../')
+
+console.log(myModule.hello())
