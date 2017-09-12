@@ -1,0 +1,15 @@
+{
+  "name": "perf-crc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crc64-ecma182": "^1.0.0",
+    "crc64-ecma182.js": "^1.0.0"
+  }
+}
