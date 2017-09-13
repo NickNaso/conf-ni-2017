@@ -20,7 +20,7 @@
 #include "kvdb.h"
 
 NAN_MODULE_INIT(Init) {
-    KVDB::Database::Init(target)
+    KVDB::Database::Init(target);
 }
 
 NODE_MODULE(kvdb, Init)
