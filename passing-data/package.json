@@ -1,6 +1,6 @@
 {
   "name": "conf-ni-2017-1",
-  "description": "This is a project used as example of ObjectWrap",
+  "description": "This is a seed project to build Node.js native module",
   "version": "0.0.1",
   "private": true,
   "author": "Nicola Del Gobbo <nicoladelgobbo@gmail.com>",
