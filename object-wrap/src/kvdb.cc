@@ -19,50 +19,88 @@
 #include "kvdb.h"
 
 using namespace v8;
+#include "deps/simdb.hpp"
 
 namespace KVDB {
 
   NAN_MODULE_INIT(Database::Init) {
     Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
-    constructor.Reset(tpl);
     tpl->SetClassName(Nan::New("Database").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
     Nan::SetPrototypeMethod(tpl, "get", Get);
     Nan::SetPrototypeMethod(tpl, "put", Put);
     Nan::SetPrototypeMethod(tpl, "keys", Keys);
     Nan::SetPrototypeMethod(tpl, "size", Size);
-    Nan::SetPrototypeMethod(tpl, "close", Close);
-
+    Nan::SetPrototypeMethod(tpl, "empty", Empty);
     // Only if you have accessor method
-    //Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
-
+    Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
+    Nan::SetAccessor(itpl, Nan::New("db_name").ToLocalChecked(), DbName);
+    Nan::SetAccessor(itpl, Nan::New("blocks").ToLocalChecked(), Blocks);
+    Nan::SetAccessor(itpl, Nan::New("block_size").ToLocalChecked(), BlockSize);
+    constructor.Reset(tpl);
     Nan::Set(target, Nan::New("Database").ToLocalChecked(), tpl->GetFunction());
   }
 
   NAN_METHOD(Database::New) {
-    KVDB::Database *database;
-
+    // Here we need some control 
+    String::Utf8Value tmpDbName(info[0]->ToString());
+    std::string dbName(*tmpDbName);
+    Nan::Maybe<int> blocks = Nan::To<int>(info[0]);
+    Nan::Maybe<int> blockSize = Nan::To<int>(info[0]);
+    KVDB::Database *database = new KVDB::Database(dbName, blocks.FromJust(), blockSize.FromJust());
+    database->Wrap(info.This());
+    info.GetReturnValue().Set(info.This());
   }
 
   NAN_METHOD(Database::Get) {
+    // Here we need some control
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+
 
   }
 
   NAN_METHOD(Database::Put) {
-    
+    // Here we need some control
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
   }
 
   NAN_METHOD(Database::Keys) {
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
     
   }
 
   NAN_METHOD(Database::Size) {
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
     
   }
 
-  NAN_METHOD(Database::Close) {
-    
+  NAN_METHOD(Database::Empty) {
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+  }
+
+  NAN_GETTER(Database::DbName) {
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    info.GetReturnValue().Set(Nan::New(database->db_name).ToLocalChecked());
+  }
+
+  NAN_GETTER(Database::Blocks) {
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    info.GetReturnValue().Set(Nan::New(database->blocks));
+  }
+
+  NAN_GETTER(Database::BlockSize) {
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    info.GetReturnValue().Set(Nan::New(database->block_size));
+  }
+
+  Database::Database(std::string db_name, int blocks, int block_size) {
+    this->db_name = db_name;
+    this->blocks = blocks;
+    this->block_size = block_size;
+  }
+
+  Database::~Database() {
+    // NOOP
   }
 
 }

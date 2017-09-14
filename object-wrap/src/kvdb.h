@@ -20,14 +20,13 @@
 #define KVDB_H
 
 #include <nan.h>
-#include "deps/simdb.hpp"
+//#include "deps/simdb.hpp"
 
 using namespace v8;
 
 namespace KVDB {
 
     class Database : public Nan::ObjectWrap {
-
         public: 
             static NAN_MODULE_INIT(Init);
             static NAN_METHOD(New);
@@ -35,16 +34,21 @@ namespace KVDB {
             static NAN_METHOD(Put);
             static NAN_METHOD(Keys);
             static NAN_METHOD(Size);
-            static NAN_METHOD(Close);
+            static NAN_METHOD(Empty);
+            static NAN_GETTER(DbName);
+            static NAN_GETTER(Blocks);
+            static NAN_GETTER(BlockSize);
         private:
             Database(std::string db_name, int blocks, int block_size);
             ~Database();
-            simdb db;
             std::string db_name;
             int blocks;
-            int block_size;
-        static Nan::Persistent<v8::FunctionTemplate> constructor;    
+            int block_size;         
     };
+
+    static Nan::Persistent<v8::FunctionTemplate> constructor; 
+
+    
 
 }
 

@@ -18,6 +18,9 @@
 
 'use strict'
 
-const myModule = require('../')
+const Database = require('../').Database
 
-console.log(myModule.hello())
+console.log(Database)
+
+const mydb = new Database('test', 1024, 4096)
+console.log(mydb.db_name)
