@@ -45,8 +45,8 @@ namespace KVDB {
     // Here we need some control 
     String::Utf8Value tmpDbName(info[0]->ToString());
     std::string dbName(*tmpDbName);
-    Nan::Maybe<int> blocks = Nan::To<int>(info[0]);
-    Nan::Maybe<int> blockSize = Nan::To<int>(info[0]);
+    Nan::Maybe<int> blocks = Nan::To<int>(info[1]);
+    Nan::Maybe<int> blockSize = Nan::To<int>(info[2]);
     KVDB::Database *database = new KVDB::Database(dbName, blocks.FromJust(), blockSize.FromJust());
     database->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
@@ -55,27 +55,30 @@ namespace KVDB {
   NAN_METHOD(Database::Get) {
     // Here we need some control
     KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
-
-
+    simdb db(database->db_name.c_str(), database->blocks, database->block_size);
   }
 
   NAN_METHOD(Database::Put) {
     // Here we need some control
     KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    simdb db(database->db_name.c_str(), database->blocks, database->block_size);
+
   }
 
   NAN_METHOD(Database::Keys) {
     KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
-    
+    simdb db(database->db_name.c_str(), database->blocks, database->block_size); 
   }
 
   NAN_METHOD(Database::Size) {
     KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    simdb db(database->db_name.c_str(), database->blocks, database->block_size);
     
   }
 
   NAN_METHOD(Database::Empty) {
     KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    simdb db(database->db_name.c_str(), database->blocks, database->block_size);
   }
 
   NAN_GETTER(Database::DbName) {

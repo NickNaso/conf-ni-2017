@@ -24,3 +24,5 @@ console.log(Database)
 
 const mydb = new Database('test', 1024, 4096)
 console.log(mydb.db_name)
+console.log(mydb.blocks)
+console.log(mydb.block_size)
