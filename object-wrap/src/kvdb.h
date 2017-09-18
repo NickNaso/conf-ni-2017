@@ -20,7 +20,8 @@
 #define KVDB_H
 
 #include <nan.h>
-//#include "deps/simdb.hpp"
+#include "deps/vedis.h"
+
 
 using namespace v8;
 
@@ -30,25 +31,19 @@ namespace KVDB {
         public: 
             static NAN_MODULE_INIT(Init);
             static NAN_METHOD(New);
-            static NAN_METHOD(Get);
-            static NAN_METHOD(Put);
-            static NAN_METHOD(Keys);
-            static NAN_METHOD(Size);
-            static NAN_METHOD(Empty);
+            static NAN_METHOD(GetKey);
+            static NAN_METHOD(PutKey);
             static NAN_GETTER(DbName);
-            static NAN_GETTER(Blocks);
-            static NAN_GETTER(BlockSize);
         private:
-            Database(std::string db_name, int blocks, int block_size);
+            Database(std::string db_name);
             ~Database();
             std::string db_name;
-            int blocks;
-            int block_size;         
+            vedis *db;     
     };
 
+    static std::string root_path = "./tmp";
+    static std::string db_extension = ".db";
     static Nan::Persistent<v8::FunctionTemplate> constructor; 
-
-    
 
 }
 

@@ -1553,7 +1553,7 @@ public:
 
     if(isOwner()){ s_flags->store(1); }
   }
-  ~simdb(){ close(); }
+  ~simdb(){ /*close();*/ }
 
   i64          len(const void *const key, u32 klen, u32* out_vlen=nullptr, u32* out_version=nullptr) const
   {

@@ -22,7 +22,15 @@ const Database = require('../').Database
 
 console.log(Database)
 
-const mydb = new Database('test', 1024, 4096)
+process.chdir(__dirname)
+
+const mydb = new Database('test')
 console.log(mydb.db_name)
-console.log(mydb.blocks)
-console.log(mydb.block_size)
+mydb.putKey("username", "NickNaso");
+console.log(mydb.getKey("username"));
+
+
+const mydb2 = Database('test2');
+console.log(mydb2.db_name)
+mydb.putKey("username", "NickNaso");
+console.log(mydb2.getKey("username"));
