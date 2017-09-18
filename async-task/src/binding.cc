@@ -16,21 +16,11 @@
  * Nicola Del Gobbo <nicoladelgobbo@gmail.com>
  ******************************************************************************/
 
-'use strict'
+#include <nan.h>
+#include "kvdb.h"
 
-const Database = require('../').Database
+NAN_MODULE_INIT(Init) {
+    KVDB::Database::Init(target);
+}
 
-console.log(Database)
-
-process.chdir(__dirname)
-
-const mydb = new Database('test')
-console.log(mydb.db_name)
-mydb.putKey("username", "NickNaso");
-console.log(mydb.getKey("username"));
-
-
-const mydb2 = Database('test2');
-console.log(mydb2.db_name)
-mydb2.putKey("username", "NickNaso");
-console.log(mydb2.getKey("username"));
+NODE_MODULE(kvdb, Init)

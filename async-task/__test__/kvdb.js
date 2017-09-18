@@ -18,10 +18,24 @@
 
 'use strict'
 
-const myModule = require('../')
+const KVDB = require('../')
 
-describe("Test myModule", function () {
-    it('Should return text equal to Hello World!', function () {
-        expect(myModule.hello()).toEqual('Hello World!')
+process.chdir(__dirname)
+
+const db = new KVDB.Database('test')
+
+describe("Test kvdb module", function () {
+
+    it('Should KVDB.Database to be a function', function () {
+        expect(typeof KVDB.Database).toEqual('function')
     })
+
+    it('Should set a key value on database', function () {
+        expect(db.putKey('username', 'NickNaso')).toEqual(undefined)
+    })
+
+    it('Should retrieve a value from database', function () {
+        expect(db.getKey('username')).toEqual('NickNaso')
+    })
+
 })

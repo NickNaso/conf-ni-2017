@@ -16,21 +16,39 @@
  * Nicola Del Gobbo <nicoladelgobbo@gmail.com>
  ******************************************************************************/
 
-'use strict'
+#ifndef KVDB_H
+#define KVDB_H
 
-const Database = require('../').Database
-
-console.log(Database)
-
-process.chdir(__dirname)
-
-const mydb = new Database('test')
-console.log(mydb.db_name)
-mydb.putKey("username", "NickNaso");
-console.log(mydb.getKey("username"));
+#include <nan.h>
+#include "deps/vedis.h"
 
 
-const mydb2 = Database('test2');
-console.log(mydb2.db_name)
-mydb2.putKey("username", "NickNaso");
-console.log(mydb2.getKey("username"));
+using namespace v8;
+
+namespace KVDB {
+
+    class Database : public Nan::ObjectWrap {
+        public: 
+            static NAN_MODULE_INIT(Init);
+            static NAN_METHOD(New);
+            static NAN_METHOD(GetKey);
+            static NAN_METHOD(PutKey);
+            static NAN_GETTER(DbName);
+        private:
+            Database(std::string db_name);
+            ~Database();
+            std::string db_name;
+            vedis *db;    
+            //static Nan::Persistent<v8::FunctionTemplate> constructor; 
+            //static inline Persistent<v8::Function> & constructor();
+            static inline Persistent<v8::Function> & constructor();
+    };
+
+    static std::string root_path = "./tmp";
+    static std::string db_extension = ".db";
+    //static Nan::Persistent<v8::FunctionTemplate> constructor; 
+    
+
+}
+
+#endif //KVDB_H

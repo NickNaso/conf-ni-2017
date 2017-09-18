@@ -18,4 +18,4 @@
 
 'use strict'
 
-module.exports = require('bindings')('myModule')
+module.exports = require('bindings')('kvdb')
