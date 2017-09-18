@@ -33,17 +33,24 @@ namespace KVDB {
     // Only if you have accessor method
     Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
     Nan::SetAccessor(itpl, Nan::New("db_name").ToLocalChecked(), DbName);
-    constructor.Reset(tpl);
-    Nan::Set(target, Nan::New("Database").ToLocalChecked(), tpl->GetFunction());
+    constructor().Reset(v8::Isolate::GetCurrent(), Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(target, Nan::New("Database").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
   }
 
   NAN_METHOD(Database::New) {
     // Here we need some control 
     String::Utf8Value tmpDbName(info[0]->ToString());
     std::string dbName(*tmpDbName);
-    KVDB::Database *database = new KVDB::Database(dbName);
-    database->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
+    if (info.IsConstructCall()) {
+      KVDB::Database *database = new KVDB::Database(dbName);
+      database->Wrap(info.This());
+      info.GetReturnValue().Set(info.This());
+    } else {
+      const int argc = 1;
+      Local<Value> argv[argc] = {info[0]};
+      Local<Function> cons = Nan::New(constructor());
+      info.GetReturnValue().Set(Nan::NewInstance(cons, argc, argv).ToLocalChecked());
+    }   
   }
 
   NAN_METHOD(Database::GetKey) {
@@ -87,6 +94,11 @@ namespace KVDB {
   NAN_GETTER(Database::DbName) {
     KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
     info.GetReturnValue().Set(Nan::New(database->db_name).ToLocalChecked());
+  }
+  
+  inline Persistent<v8::Function> & Database::constructor() {
+    static Persistent<v8::Function> kvdb_constructor;
+    return kvdb_constructor;
   }
 
   Database::Database(std::string db_name) {

@@ -38,12 +38,16 @@ namespace KVDB {
             Database(std::string db_name);
             ~Database();
             std::string db_name;
-            vedis *db;     
+            vedis *db;    
+            //static Nan::Persistent<v8::FunctionTemplate> constructor; 
+            //static inline Persistent<v8::Function> & constructor();
+            static inline Persistent<v8::Function> & constructor();
     };
 
     static std::string root_path = "./tmp";
     static std::string db_extension = ".db";
-    static Nan::Persistent<v8::FunctionTemplate> constructor; 
+    //static Nan::Persistent<v8::FunctionTemplate> constructor; 
+    
 
 }
 

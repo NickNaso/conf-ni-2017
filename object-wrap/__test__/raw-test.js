@@ -32,5 +32,5 @@ console.log(mydb.getKey("username"));
 
 const mydb2 = Database('test2');
 console.log(mydb2.db_name)
-mydb.putKey("username", "NickNaso");
+mydb2.putKey("username", "NickNaso");
 console.log(mydb2.getKey("username"));
