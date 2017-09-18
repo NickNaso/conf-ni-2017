@@ -31,8 +31,8 @@ namespace KVDB {
         public: 
             static NAN_MODULE_INIT(Init);
             static NAN_METHOD(New);
-            static NAN_METHOD(GetKey);
-            static NAN_METHOD(PutKey);
+            static NAN_METHOD(GetKeySync);
+            static NAN_METHOD(PutKeySync);
             static NAN_GETTER(DbName);
         private:
             Database(std::string db_name);

@@ -31,11 +31,11 @@ describe("Test kvdb module", function () {
     })
 
     it('Should set a key value on database', function () {
-        expect(db.putKey('username', 'NickNaso')).toEqual(undefined)
+        expect(db.putKeySync('username', 'NickNaso')).toEqual(undefined)
     })
 
     it('Should retrieve a value from database', function () {
-        expect(db.getKey('username')).toEqual('NickNaso')
+        expect(db.getKeySync('username')).toEqual('NickNaso')
     })
 
 })

@@ -28,8 +28,8 @@ namespace KVDB {
     Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
     tpl->SetClassName(Nan::New("Database").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
-    Nan::SetPrototypeMethod(tpl, "getKey", GetKey);
-    Nan::SetPrototypeMethod(tpl, "putKey", PutKey);
+    Nan::SetPrototypeMethod(tpl, "getKeySync", GetKeySync);
+    Nan::SetPrototypeMethod(tpl, "putKeySync", PutKeySync);
     // Only if you have accessor method
     Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
     Nan::SetAccessor(itpl, Nan::New("db_name").ToLocalChecked(), DbName);
@@ -53,7 +53,7 @@ namespace KVDB {
     }   
   }
 
-  NAN_METHOD(Database::GetKey) {
+  NAN_METHOD(Database::GetKeySync) {
     // Here we need some control
     String::Utf8Value tmpKey(info[0]->ToString());
     std::string key(*tmpKey);
@@ -74,7 +74,7 @@ namespace KVDB {
     info.GetReturnValue().Set(Nan::New(value).ToLocalChecked());
   }
 
-  NAN_METHOD(Database::PutKey) {
+  NAN_METHOD(Database::PutKeySync) {
     // Here we need some control
     String::Utf8Value tmpKey(info[0]->ToString());
     std::string key(*tmpKey);
@@ -88,7 +88,7 @@ namespace KVDB {
     if (rc != VEDIS_OK) {
       // Hanlde  error
     }
-    info.GetReturnValue().Set(Nan::Undefined());
+    info.GetReturnValue().SetUndefined();
   }
 
   NAN_GETTER(Database::DbName) {
