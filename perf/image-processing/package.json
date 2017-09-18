@@ -1,0 +1,13 @@
+{
+  "name": "perf-image-processing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jimp": "^0.2.28",
+    "sharp": "^0.18.4"
+  }
+}
