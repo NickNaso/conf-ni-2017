@@ -16,12 +16,37 @@
  * Nicola Del Gobbo <nicoladelgobbo@gmail.com>
  ******************************************************************************/
 
-'use strict'
+#ifndef KVDB_H
+#define KVDB_H
 
-const myModule = require('../')
+#include <nan.h>
+#include "deps/vedis.h"
 
-describe("Test myModule", function () {
-    it('Should return text equal to Hello World!', function () {
-        expect(myModule.hello()).toEqual('Hello World!')
-    })
-})
+
+using namespace v8;
+
+namespace KVDB {
+
+    class Database : public Nan::ObjectWrap {
+        public: 
+            static NAN_MODULE_INIT(Init);
+            static NAN_METHOD(New);
+            static NAN_METHOD(GetKey);
+            static NAN_METHOD(GetKeySync);
+            static NAN_METHOD(PutKey);
+            static NAN_METHOD(PutKeySync);
+            static NAN_GETTER(DbName);
+        private:
+            Database(std::string db_name);
+            ~Database();
+            std::string db_name;
+            vedis *db;
+            static inline Persistent<v8::Function> & constructor();
+    };
+
+    static std::string root_path = "./tmp";
+    static std::string db_extension = ".db";
+
+}
+
+#endif //KVDB_H

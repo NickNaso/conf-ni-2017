@@ -18,36 +18,24 @@
 
 'use strict'
 
-const Database = require('../').Database
-
-console.log(Database)
+const KVDB = require('../')
 
 process.chdir(__dirname)
 
-const mydb = new Database('test')
-console.log(mydb.db_name)
-mydb.putKeySync("username", "NickNaso");
-console.log(mydb.getKeySync("username"));
+const db = new KVDB.Database('test')
 
-mydb.getKey("username", function(err, value) {
-    if (err) {
-        console.error('Error happened retrieving key -> username')
-    } else {
-        console.log("Value from my async API")
-        console.log(value)
-    }
+describe("Test kvdb module", function () {
+
+    it('Should KVDB.Database to be a function', function () {
+        expect(typeof KVDB.Database).toEqual('function')
+    })
+
+    it('Should set a key value on database', function () {
+        expect(db.putKeySync('username', 'NickNaso')).toEqual(undefined)
+    })
+
+    it('Should retrieve a value from database', function () {
+        expect(db.getKeySync('username')).toEqual('NickNaso')
+    })
+
 })
-
-mydb.putKey("password", "keeplooking", function (err, value) {
-    if (err) {
-        console.error("Error happened storing value for key -> password")
-    } else {
-        console.log("Value for key -> password successfully stored")
-    }
-})
-
-const mydb2 = Database('test2');
-console.log(mydb2.db_name)
-mydb2.putKeySync("username", "NickNaso");
-console.log(mydb2.getKeySync("username"));
-

@@ -16,38 +16,11 @@
  * Nicola Del Gobbo <nicoladelgobbo@gmail.com>
  ******************************************************************************/
 
-'use strict'
+#include <nan.h>
+#include "kvdb.h"
 
-const Database = require('../').Database
+NAN_MODULE_INIT(Init) {
+    KVDB::Database::Init(target);
+}
 
-console.log(Database)
-
-process.chdir(__dirname)
-
-const mydb = new Database('test')
-console.log(mydb.db_name)
-mydb.putKeySync("username", "NickNaso");
-console.log(mydb.getKeySync("username"));
-
-mydb.getKey("username", function(err, value) {
-    if (err) {
-        console.error('Error happened retrieving key -> username')
-    } else {
-        console.log("Value from my async API")
-        console.log(value)
-    }
-})
-
-mydb.putKey("password", "keeplooking", function (err, value) {
-    if (err) {
-        console.error("Error happened storing value for key -> password")
-    } else {
-        console.log("Value for key -> password successfully stored")
-    }
-})
-
-const mydb2 = Database('test2');
-console.log(mydb2.db_name)
-mydb2.putKeySync("username", "NickNaso");
-console.log(mydb2.getKeySync("username"));
-
+NODE_MODULE(kvdb, Init)
