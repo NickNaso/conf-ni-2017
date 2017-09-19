@@ -161,7 +161,7 @@ namespace KVDB {
      cmd << "SET " + key + " '" + value + "'";
      Nan::Callback *callback = new Nan::Callback(info[2].As<Function>());
      KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
-     AsyncQueueWorker(new GetKeyWorker(callback, database->db, cmd.str()));
+     AsyncQueueWorker(new PutKeyWorker(callback, database->db, cmd.str()));
      info.GetReturnValue().SetUndefined();
   }
 
