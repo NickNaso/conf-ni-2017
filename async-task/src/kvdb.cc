@@ -22,13 +22,78 @@
 
 using namespace v8;
 
+
+class GetKeyWorker: public Nan::AsyncWorker {
+  public:
+    GetKeyWorker(Nan::Callback *callback, vedis *db, std::string cmd )
+      :AsyncWorker(callback), db(db), cmd(cmd) {}
+    ~GetKeyWorker() {}
+
+    void Execute() {
+      int rc;
+      rc = vedis_exec(db, cmd.c_str(), -1);
+      if(rc != VEDIS_OK) { 
+        // Handle error
+      } 
+      /* Extract the return value of the last executed command (i.e. 'GET test') " */
+      vedis_value *result;
+      vedis_exec_result(db, &result);
+      /* Cast the vedis object to a string */
+      value = vedis_value_to_string(result, 0);
+    }
+
+    void HandleOKCallback() {
+      Nan::HandleScope();
+      int argc = 2;
+      Local<Value> argv[2];
+      argv[0] = Nan::Null();
+      argv[1] = Nan::New(value).ToLocalChecked();
+      callback->Call(argc, argv);
+    }
+
+  private:
+    vedis *db; 
+    std::string cmd;
+    const char *value;
+};
+
+class PutKeyWorker: public Nan::AsyncWorker {
+  public:
+    PutKeyWorker(Nan::Callback *callback, vedis *db, std::string cmd)
+      :AsyncWorker(callback), db(db), cmd(cmd) {}
+    ~PutKeyWorker() {}
+
+    void Execute() {
+      int rc;
+      rc = vedis_exec(db, cmd.c_str(), -1);
+      if(rc != VEDIS_OK) { 
+        // Handle error
+      }
+    }
+
+    void HandleOKCallback() {
+      Nan::HandleScope();
+      int argc = 1;
+      Local<Value> argv[1];
+      argv[0] = Nan::Null();
+      callback->Call(argc, argv);
+    }
+
+  private:
+    vedis *db; 
+    std::string cmd; 
+};
+
+
 namespace KVDB {
 
   NAN_MODULE_INIT(Database::Init) {
     Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
     tpl->SetClassName(Nan::New("Database").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
+    Nan::SetPrototypeMethod(tpl, "getKey", GetKey);
     Nan::SetPrototypeMethod(tpl, "getKeySync", GetKeySync);
+    Nan::SetPrototypeMethod(tpl, "putKey", PutKey);
     Nan::SetPrototypeMethod(tpl, "putKeySync", PutKeySync);
     // Only if you have accessor method
     Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
@@ -53,6 +118,18 @@ namespace KVDB {
     }   
   }
 
+  NAN_METHOD(Database::GetKey) {
+      // Here we need some control
+      String::Utf8Value tmpKey(info[0]->ToString());
+      Nan::Callback *callback = new Nan::Callback(info[1].As<Function>());
+      std::string key(*tmpKey);
+      std::stringstream cmd;
+      cmd << "GET " + key;
+      KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+      AsyncQueueWorker(new GetKeyWorker(callback, database->db, cmd.str()));
+      info.GetReturnValue().SetUndefined();
+  }
+
   NAN_METHOD(Database::GetKeySync) {
     // Here we need some control
     String::Utf8Value tmpKey(info[0]->ToString());
@@ -72,6 +149,20 @@ namespace KVDB {
     /* Cast the vedis object to a string */
     value = vedis_value_to_string(result, 0);
     info.GetReturnValue().Set(Nan::New(value).ToLocalChecked());
+  }
+
+  NAN_METHOD(Database::PutKey) {
+     // Here we need some control
+     String::Utf8Value tmpKey(info[0]->ToString());
+     std::string key(*tmpKey);
+     String::Utf8Value tmpValue(info[1]->ToString());
+     std::string value(*tmpValue);
+     std::stringstream cmd;
+     cmd << "SET " + key + " '" + value + "'";
+     Nan::Callback *callback = new Nan::Callback(info[2].As<Function>());
+     KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+     AsyncQueueWorker(new GetKeyWorker(callback, database->db, cmd.str()));
+     info.GetReturnValue().SetUndefined();
   }
 
   NAN_METHOD(Database::PutKeySync) {
