@@ -1,6 +1,0 @@
-{
-    "spec_dir": "__test__",
-    "spec_files": [
-      "kvdb.js"
-    ]
-  }
