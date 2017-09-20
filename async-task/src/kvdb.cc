@@ -92,6 +92,7 @@ namespace KVDB {
     tpl->SetClassName(Nan::New("Database").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
     Nan::SetPrototypeMethod(tpl, "getKey", GetKey);
+    Nan::SetPrototypeMethod(tpl, "getKey", GetKey);
     Nan::SetPrototypeMethod(tpl, "getKeySync", GetKeySync);
     Nan::SetPrototypeMethod(tpl, "putKey", PutKey);
     Nan::SetPrototypeMethod(tpl, "putKeySync", PutKeySync);

@@ -38,7 +38,7 @@ mydb.getKey("username", function(err, value) {
     }
 })
 
-mydb.putKey("password", "keeplooking", function (err, value) {
+mydb.putKey("password", "keeplooking", function (err) {
     if (err) {
         console.error("Error happened storing value for key -> password")
     } else {

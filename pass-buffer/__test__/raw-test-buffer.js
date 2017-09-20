@@ -16,39 +16,35 @@
  * Nicola Del Gobbo <nicoladelgobbo@gmail.com>
  ******************************************************************************/
 
-#ifndef KVDB_H
-#define KVDB_H
+'use strict'
 
-#include <nan.h>
-#include "deps/vedis.h"
+const Database = require('../').Database
+
+console.log(Database)
+
+process.chdir(__dirname)
+
+const mydb = new Database('test')
+console.log(mydb.db_name)
+mydb.putKeySync("username", "NickNaso");
+console.log(mydb.getKeySync("username"));
+
+const buffer = Buffer.from('qwertyuiopasdfghjklzxcvbnm1234567890')
+
+mydb.putKeyBuffer("image", buffer, function (err) {
+    if (err) {
+        console.error("Error happened storing buffer value for key -> image")
+    } else {
+        console.log("Buffer value for key -> image successfully stored")
+        mydb.getKeyBuffer('image', function (err, buffer) {
+            if (err) {
+                console.error('Error happened retrieving buffer value for key -> image')
+            } else {
+                console.log(buffer.toString())
+            }
+        })
+    }
+})
 
 
-using namespace v8;
 
-namespace KVDB {
-
-    class Database : public Nan::ObjectWrap {
-        public: 
-            static NAN_MODULE_INIT(Init);
-            static NAN_METHOD(New);
-            static NAN_METHOD(GetKey);
-            static NAN_METHOD(GetKeyBuffer);
-            static NAN_METHOD(GetKeySync);
-            static NAN_METHOD(PutKey);
-            static NAN_METHOD(PutKeyBuffer);
-            static NAN_METHOD(PutKeySync);
-            static NAN_GETTER(DbName);
-        private:
-            Database(std::string db_name);
-            ~Database();
-            std::string db_name;
-            vedis *db;
-            static inline Persistent<v8::Function> & constructor();
-    };
-
-    static std::string root_path = "./tmp";
-    static std::string db_extension = ".db";
-
-}
-
-#endif //KVDB_H

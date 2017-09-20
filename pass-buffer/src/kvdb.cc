@@ -22,7 +22,6 @@
 
 using namespace v8;
 
-
 class GetKeyWorker: public Nan::AsyncWorker {
   public:
     GetKeyWorker(Nan::Callback *callback, vedis *db, std::string cmd )
@@ -84,6 +83,90 @@ class PutKeyWorker: public Nan::AsyncWorker {
     std::string cmd; 
 };
 
+/*void buffer_delete_callback(char* data, void* the_vector) {
+  delete reinterpret_cast<vector<unsigned char> *> (the_vector);
+}*/
+
+class GetKeyBufferWorker: public Nan::AsyncWorker {
+  public:
+    GetKeyBufferWorker(Nan::Callback *callback, vedis *db, std::string key)
+      :AsyncWorker(callback), db(db), key(key) {}
+    ~GetKeyBufferWorker() {}
+
+    void Execute() {
+      int rc;
+      std::stringstream get_cmd;
+      get_cmd << "GET " + key;
+      rc = vedis_exec(db, (get_cmd.str()).c_str(), -1);
+      if(rc != VEDIS_OK) { 
+        // Handle error
+      } 
+      /* Extract the return value of the last executed command (i.e. 'GET test') " */
+      vedis_value *get_result;
+      vedis_exec_result(db, &get_result);
+      /* Cast the vedis object to a string */
+      this->buffer = const_cast<char *>(vedis_value_to_string(get_result, 0));
+      std::stringstream strlenCmd;
+      strlenCmd << "STRLEN " + key;
+      rc = vedis_exec(db, (strlenCmd.str()).c_str(), -1);
+      if(rc != VEDIS_OK) { 
+        // Handle error
+      }
+      /* Extract the return value of the last executed command (i.e. 'STRLEN test') " */
+      vedis_value *strlen_result;
+      vedis_exec_result(db, &strlen_result);
+      /* Cast the vedis object to a string */
+      this->buffer_length = vedis_value_to_int(get_result); 
+    }
+
+    void HandleOKCallback() {
+      Nan::HandleScope();
+      int argc = 2;
+      Local<Value> argv[2];
+      argv[0] = Nan::Null();
+      argv[1] = Nan::Null();//Nan::NewBuffer(this->buffer, this->buffer_length).ToLocalChecked();
+      callback->Call(argc, argv);
+    }
+  private:
+    vedis *db; 
+    std::string key;
+    char *buffer;
+    int buffer_length;
+};
+
+class PutKeyBufferWorker: public Nan::AsyncWorker {
+  public:
+    PutKeyBufferWorker(Nan::Callback *callback, vedis *db, std::string key, Local<Object> &value)
+      :AsyncWorker(callback), db(db), key(key) {
+        this->buffer = node::Buffer::Data(value);
+        this->buffer_length = node::Buffer::Length(value);
+      }
+    ~PutKeyBufferWorker() {}
+
+    void Execute() {
+      int rc;
+      //rc = vedis_exec(db, cmd.c_str(), -1);
+      rc = vedis_kv_store(db, key.c_str(), -1, this->buffer, this->buffer_length);
+      if(rc != VEDIS_OK) { 
+        // Handle error
+        std::cout << "Error: " << rc;
+      }
+    }
+
+    void HandleOKCallback() {
+      Nan::HandleScope();
+      int argc = 1;
+      Local<Value> argv[1];
+      argv[0] = Nan::Null();
+      callback->Call(argc, argv);
+    }
+
+  private:
+    vedis *db; 
+    std::string key; 
+    char *buffer;
+    int buffer_length;
+};
 
 namespace KVDB {
 
@@ -92,8 +175,10 @@ namespace KVDB {
     tpl->SetClassName(Nan::New("Database").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
     Nan::SetPrototypeMethod(tpl, "getKey", GetKey);
+    Nan::SetPrototypeMethod(tpl, "getKeyBuffer", GetKeyBuffer);
     Nan::SetPrototypeMethod(tpl, "getKeySync", GetKeySync);
     Nan::SetPrototypeMethod(tpl, "putKey", PutKey);
+    Nan::SetPrototypeMethod(tpl, "putKeyBuffer", PutKeyBuffer);
     Nan::SetPrototypeMethod(tpl, "putKeySync", PutKeySync);
     // Only if you have accessor method
     Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
@@ -130,6 +215,18 @@ namespace KVDB {
       info.GetReturnValue().SetUndefined();
   }
 
+  NAN_METHOD(Database::GetKeyBuffer) {
+    // Here we need some control
+    String::Utf8Value tmpKey(info[0]->ToString());
+    Nan::Callback *callback = new Nan::Callback(info[1].As<Function>());
+    std::string key(*tmpKey);
+    //std::stringstream cmd;
+    //cmd << "GET " + key;
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    AsyncQueueWorker(new GetKeyBufferWorker(callback, database->db, key));
+    info.GetReturnValue().SetUndefined();
+  }
+
   NAN_METHOD(Database::GetKeySync) {
     // Here we need some control
     String::Utf8Value tmpKey(info[0]->ToString());
@@ -152,16 +249,31 @@ namespace KVDB {
   }
 
   NAN_METHOD(Database::PutKey) {
+    // Here we need some control
+    String::Utf8Value tmpKey(info[0]->ToString());
+    std::string key(*tmpKey);
+    String::Utf8Value tmpValue(info[1]->ToString());
+    std::string value(*tmpValue);
+    std::stringstream cmd;
+    cmd << "SET " + key + " '" + value + "'";
+    Nan::Callback *callback = new Nan::Callback(info[2].As<Function>());
+    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    AsyncQueueWorker(new PutKeyWorker(callback, database->db, cmd.str()));
+    info.GetReturnValue().SetUndefined();
+ }
+
+  NAN_METHOD(Database::PutKeyBuffer) {
      // Here we need some control
      String::Utf8Value tmpKey(info[0]->ToString());
      std::string key(*tmpKey);
-     String::Utf8Value tmpValue(info[1]->ToString());
-     std::string value(*tmpValue);
-     std::stringstream cmd;
-     cmd << "SET " + key + " '" + value + "'";
+     //String::Utf8Value tmpValue(info[1]->ToString());
+     //std::string value(*tmpValue);
+     //std::stringstream cmd;
+     //cmd << "SET " + key + " '" + value + "'";
+     Local<Object> value = info[1]->ToObject();
      Nan::Callback *callback = new Nan::Callback(info[2].As<Function>());
      KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
-     AsyncQueueWorker(new GetKeyWorker(callback, database->db, cmd.str()));
+     AsyncQueueWorker(new PutKeyBufferWorker(callback, database->db, key, value));
      info.GetReturnValue().SetUndefined();
   }
 
