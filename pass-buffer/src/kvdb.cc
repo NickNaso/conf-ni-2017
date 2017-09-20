@@ -83,9 +83,9 @@ class PutKeyWorker: public Nan::AsyncWorker {
     std::string cmd; 
 };
 
-/*void buffer_delete_callback(char* data, void* the_vector) {
-  delete reinterpret_cast<vector<unsigned char> *> (the_vector);
-}*/
+void buffer_delete_callback(char* data, void* hint) {
+  free(data);
+}
 
 class GetKeyBufferWorker: public Nan::AsyncWorker {
   public:
@@ -95,17 +95,7 @@ class GetKeyBufferWorker: public Nan::AsyncWorker {
 
     void Execute() {
       int rc;
-      std::stringstream get_cmd;
-      get_cmd << "GET " + key;
-      rc = vedis_exec(db, (get_cmd.str()).c_str(), -1);
-      if(rc != VEDIS_OK) { 
-        // Handle error
-      } 
-      /* Extract the return value of the last executed command (i.e. 'GET test') " */
-      vedis_value *get_result;
-      vedis_exec_result(db, &get_result);
-      /* Cast the vedis object to a string */
-      this->buffer = const_cast<char *>(vedis_value_to_string(get_result, 0));
+
       std::stringstream strlenCmd;
       strlenCmd << "STRLEN " + key;
       rc = vedis_exec(db, (strlenCmd.str()).c_str(), -1);
@@ -116,7 +106,21 @@ class GetKeyBufferWorker: public Nan::AsyncWorker {
       vedis_value *strlen_result;
       vedis_exec_result(db, &strlen_result);
       /* Cast the vedis object to a string */
-      this->buffer_length = vedis_value_to_int(get_result); 
+      this->buffer_length = vedis_value_to_int(strlen_result); 
+
+      std::stringstream get_cmd;
+      get_cmd << "GET " + key;
+      rc = vedis_exec(db, (get_cmd.str()).c_str(), -1);
+      if(rc != VEDIS_OK) { 
+        // Handle error
+      } 
+      /* Extract the return value of the last executed command (i.e. 'GET test') " */
+      vedis_value *get_result;
+      vedis_exec_result(db, &get_result);
+      /* Cast the vedis object to a string */
+      this->buffer = static_cast<char *>(malloc(this->buffer_length));
+      this->buffer = const_cast<char *>(vedis_value_to_string(get_result, 0));
+      
     }
 
     void HandleOKCallback() {
@@ -124,7 +128,13 @@ class GetKeyBufferWorker: public Nan::AsyncWorker {
       int argc = 2;
       Local<Value> argv[2];
       argv[0] = Nan::Null();
-      argv[1] = Nan::Null();//Nan::NewBuffer(this->buffer, this->buffer_length).ToLocalChecked();
+      // Error violation memory
+      //argv[1] = Nan::NewBuffer(this->buffer, this->buffer_length).ToLocalChecked();
+      // Not efficient solution
+      //argv[1] = Nan::CopyBuffer(this->buffer, this->buffer_length).ToLocalChecked();
+      Local<Object> data = 
+      Nan::NewBuffer(this->buffer, this->buffer_length, buffer_delete_callback, this->buffer).ToLocalChecked();
+      argv[1] = data;
       callback->Call(argc, argv);
     }
   private:
