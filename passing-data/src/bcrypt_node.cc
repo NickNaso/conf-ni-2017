@@ -118,23 +118,38 @@ NAN_METHOD(GenerateSalt) {
 NAN_METHOD(GenerateSaltSync) {
     Nan::HandleScope scope;
 
+
     if (info.Length() < 2) {
         Nan::ThrowTypeError("2 arguments expected");
         return;
     }
+
+
 
     if (!Buffer::HasInstance(info[1]) || Buffer::Length(info[1].As<Object>()) != 16) {
         Nan::ThrowTypeError("Second argument must be a 16 byte Buffer");
         return;
     }
 
+
+
+
     const int32_t rounds = Nan::To<int32_t>(info[0]).FromMaybe(0);
     u_int8_t* seed = (u_int8_t*)Buffer::Data(info[1].As<Object>());
+
+
+
 
     char salt[_SALT_LEN];
     bcrypt_gensalt(rounds, seed, salt);
 
+
+
+
     info.GetReturnValue().Set(Nan::Encode(salt, strlen(salt), Nan::BINARY));
+
+
+
 }
 
 /* ENCRYPT DATA - USED TO BE HASHPW */
@@ -341,7 +356,11 @@ NAN_METHOD(GetRounds) {
 } // anonymous namespace
 
 NAN_MODULE_INIT(init) {
+
+    
     Nan::Export(target, "gen_salt_sync", GenerateSaltSync);
+    
+    
     Nan::Export(target, "encrypt_sync", EncryptSync);
     Nan::Export(target, "compare_sync", CompareSync);
     Nan::Export(target, "get_rounds", GetRounds);
@@ -350,4 +369,8 @@ NAN_MODULE_INIT(init) {
     Nan::Export(target, "compare", Compare);
 };
 
+
+
 NODE_MODULE(bcrypt_lib, init);
+
+
