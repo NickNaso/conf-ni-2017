@@ -3,10 +3,20 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NickNaso/conf-ni-2017.git"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "bugs": {
+    "url": "https://github.com/NickNaso/conf-ni-2017/issues"
+  },
   "dependencies": {
+    "express": "^4.15.4",
     "jimp": "^0.2.28",
     "sharp": "^0.18.4"
   }
