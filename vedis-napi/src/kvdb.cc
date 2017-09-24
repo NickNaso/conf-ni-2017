@@ -193,7 +193,7 @@ namespace KVDB {
     // Only if you have accessor method
     Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
     Napi::SetAccessor(itpl, Napi::String::New(env, "db_name"), DbName);
-    constructor().Reset(v8::Isolate::GetCurrent(), Napi::GetFunction(tpl));
+    //constructor().Reset(v8::Isolate::GetCurrent(), Napi::GetFunction(tpl));
     (target).Set(Napi::String::New(env, "Database"), Napi::GetFunction(tpl));
   }
 
@@ -309,15 +309,23 @@ namespace KVDB {
     return Napi::New(env, database->db_name);
   }
   
-  inline Persistent<v8::Function> & Database::constructor() {
+  /*inline Persistent<v8::Function> & Database::constructor() {
     static Persistent<v8::Function> kvdb_constructor;
     return kvdb_constructor;
-  }
+  }*/
 
   Database::Database(std::string db_name) {
     this->db_name = db_name;
     std::stringstream db_path;
     db_path << root_path << "/" << db_name << db_extension;
+    int r;
+    uv_fs_t req;
+    uv_stat_t* s;
+    r = uv_fs_stat(uv_, &req, db_path, NULL);
+    if (r = 0) {
+      std::cout << "uv_fs_stat 0";
+    } 
+
     int rc;
     rc = vedis_open(&(this->db), (db_path.str()).c_str());
     //rc = vedis_open(&(this->db), NULL);

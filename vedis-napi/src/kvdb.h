@@ -44,7 +44,7 @@ namespace KVDB {
             ~Database();
             std::string db_name;
             vedis *db;
-            static inline Persistent<v8::Function> & constructor();
+            //static inline Persistent<v8::Function> & constructor();
     };
 
     static std::string root_path = "./tmp";

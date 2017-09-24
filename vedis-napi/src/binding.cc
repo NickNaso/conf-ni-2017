@@ -21,7 +21,7 @@
 #include "kvdb.h"
 
 void Init(Napi::Env env, Napi::Object exports, Napi::Object module) {
-    KVDB::Database::Init(env, target, module);
+    KVDB::Database::Init(env, exports, module);
 }
 
 NODE_API_MODULE(kvdb, Init)
