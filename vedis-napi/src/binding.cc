@@ -16,11 +16,12 @@
  * Nicola Del Gobbo <nicoladelgobbo@gmail.com>
  ******************************************************************************/
 
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 #include "kvdb.h"
 
-NAN_MODULE_INIT(Init) {
-    KVDB::Database::Init(target);
+void Init(Napi::Env env, Napi::Object exports, Napi::Object module) {
+    KVDB::Database::Init(env, target, module);
 }
 
-NODE_MODULE(kvdb, Init)
+NODE_API_MODULE(kvdb, Init)

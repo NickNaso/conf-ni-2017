@@ -19,25 +19,26 @@
 #ifndef KVDB_H
 #define KVDB_H
 
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 #include "deps/vedis.h"
 
 
-using namespace v8;
+using namespace Napi;
 
 namespace KVDB {
 
-    class Database : public Nan::ObjectWrap {
+    class Database : public Napi::ObjectWrap<Database> {
         public: 
-            static NAN_MODULE_INIT(Init);
-            static NAN_METHOD(New);
-            static NAN_METHOD(GetKey);
-            static NAN_METHOD(GetKeyBuffer);
-            static NAN_METHOD(GetKeySync);
-            static NAN_METHOD(PutKey);
-            static NAN_METHOD(PutKeyBuffer);
-            static NAN_METHOD(PutKeySync);
-            static NAN_GETTER(DbName);
+            static void Init(Napi::Env env, Napi::Object exports, Napi::Object module);
+            static Napi::Value New(const Napi::CallbackInfo& info);
+            static Napi::Value GetKey(const Napi::CallbackInfo& info);
+            static Napi::Value GetKeyBuffer(const Napi::CallbackInfo& info);
+            static Napi::Value GetKeySync(const Napi::CallbackInfo& info);
+            static Napi::Value PutKey(const Napi::CallbackInfo& info);
+            static Napi::Value PutKeyBuffer(const Napi::CallbackInfo& info);
+            static Napi::Value PutKeySync(const Napi::CallbackInfo& info);
+            Napi::Value DbName(const Napi::CallbackInfo& info);
         private:
             Database(std::string db_name);
             ~Database();
