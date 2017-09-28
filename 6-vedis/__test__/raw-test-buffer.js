@@ -29,20 +29,23 @@ console.log(mydb.db_name)
 mydb.putKeySync("username", "NickNaso");
 console.log(mydb.getKeySync("username"));
 
+
 const buffer = Buffer.from('qwertyuiopasdfghjklzxcvbnm1234567890')
 
-mydb.putKeyBuffer("image", buffer, function (err) {
+mydb.putKeyBuffer('image', buffer, function (err) {
     if (err) {
-        console.error("Error happened storing buffer value for key -> image")
+        console.error(err)
     } else {
-        console.log("Buffer value for key -> image successfully stored")
-        mydb.getKeyBuffer('image', function (err, buffer) {
-            if (err) {
-                console.error('Error happened retrieving buffer value for key -> image')
-            } else {
-                console.log(buffer.toString())
-            }
-        })
+        console.log('Buffer stored')
+        
+    }
+})
+
+mydb.getKeyBuffer('image', function (err, buffer) {
+    if (err) {
+        console.error(err)
+    } else {
+        console.log(buffer.toString())
     }
 })
 

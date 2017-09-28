@@ -118,7 +118,7 @@ class GetKeyBufferWorker: public Nan::AsyncWorker {
       vedis_value *get_result;
       vedis_exec_result(db, &get_result);
       /* Cast the vedis object to a string */
-      this->buffer = static_cast<char *>(malloc(this->buffer_length));
+      //this->buffer = static_cast<char *>(malloc(this->buffer_length));
       this->buffer = const_cast<char *>(vedis_value_to_string(get_result, 0));
       
     }
@@ -128,9 +128,7 @@ class GetKeyBufferWorker: public Nan::AsyncWorker {
       int argc = 2;
       Local<Value> argv[2];
       argv[0] = Nan::Null();
-      // Error violation memory
-      //argv[1] = Nan::NewBuffer(this->buffer, this->buffer_length).ToLocalChecked();
-      // Not efficient solution
+      // Not efficient solution to free memory
       //argv[1] = Nan::CopyBuffer(this->buffer, this->buffer_length).ToLocalChecked();
       Local<Object> data = 
       Nan::NewBuffer(this->buffer, this->buffer_length, buffer_delete_callback, this->buffer).ToLocalChecked();
@@ -144,12 +142,17 @@ class GetKeyBufferWorker: public Nan::AsyncWorker {
     int buffer_length;
 };
 
+
 class PutKeyBufferWorker: public Nan::AsyncWorker {
   public:
     PutKeyBufferWorker(Nan::Callback *callback, vedis *db, std::string key, Local<Object> &value)
       :AsyncWorker(callback), db(db), key(key) {
+
+
+
         this->buffer = node::Buffer::Data(value);
         this->buffer_length = node::Buffer::Length(value);
+
       }
     ~PutKeyBufferWorker() {}
 
@@ -184,16 +187,23 @@ namespace KVDB {
     Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
     tpl->SetClassName(Nan::New("Database").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+
     Nan::SetPrototypeMethod(tpl, "getKey", GetKey);
     Nan::SetPrototypeMethod(tpl, "getKeyBuffer", GetKeyBuffer);
     Nan::SetPrototypeMethod(tpl, "getKeySync", GetKeySync);
     Nan::SetPrototypeMethod(tpl, "putKey", PutKey);
     Nan::SetPrototypeMethod(tpl, "putKeyBuffer", PutKeyBuffer);
     Nan::SetPrototypeMethod(tpl, "putKeySync", PutKeySync);
-    // Only if you have accessor method
+
+
     Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
     Nan::SetAccessor(itpl, Nan::New("db_name").ToLocalChecked(), DbName);
+
+
+
     constructor().Reset(v8::Isolate::GetCurrent(), Nan::GetFunction(tpl).ToLocalChecked());
+
     Nan::Set(target, Nan::New("Database").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
   }
 
@@ -276,10 +286,6 @@ namespace KVDB {
      // Here we need some control
      String::Utf8Value tmpKey(info[0]->ToString());
      std::string key(*tmpKey);
-     //String::Utf8Value tmpValue(info[1]->ToString());
-     //std::string value(*tmpValue);
-     //std::stringstream cmd;
-     //cmd << "SET " + key + " '" + value + "'";
      Local<Object> value = info[1]->ToObject();
      Nan::Callback *callback = new Nan::Callback(info[2].As<Function>());
      KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
