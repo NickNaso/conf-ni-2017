@@ -26,6 +26,15 @@
 
 #### [Documentation for NAN](https://github.com/nodejs/nan)
 
+### Web resources
+* **[V8 Data Types](https://annamag.github.io/codeandart/outreachy/V8-Data-Types/)**
+* **[V8 blog](https://v8project.blogspot.it/)**
+* **[Understanding V8 bytecode](https://medium.com/dailyjs/understanding-v8s-bytecode-317d46c94775)**
+* **[How to get a performance boost using Node.js native addons](https://medium.com/developers-writing/how-to-get-a-performance-boost-using-node-js-native-addons-fd3a24719c85)**
+* **[N-API Next generation Node API for native modules](https://www.slideshare.net/michaeldawson3572846/n-apinode-summit2017final)**
+* **[Start with N-API](https://hackernoon.com/n-api-and-getting-started-with-writing-c-addons-for-node-js-cf061b3eae75)**
+* **[Nodeaddons.com](https://nodeaddons.com/)**
+
 ### Nicola Del Gobbo
 
 <https://github.com/NickNaso/>
