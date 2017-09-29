@@ -27,6 +27,7 @@
 #### [Documentation for NAN](https://github.com/nodejs/nan)
 
 ### Web resources
+* **[V8 Dcoumentation for Node.js](https://v8docs.nodesource.com/)**
 * **[V8 Data Types](https://annamag.github.io/codeandart/outreachy/V8-Data-Types/)**
 * **[V8 blog](https://v8project.blogspot.it/)**
 * **[Understanding V8 bytecode](https://medium.com/dailyjs/understanding-v8s-bytecode-317d46c94775)**
