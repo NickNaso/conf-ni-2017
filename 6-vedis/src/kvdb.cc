@@ -147,12 +147,8 @@ class PutKeyBufferWorker: public Nan::AsyncWorker {
   public:
     PutKeyBufferWorker(Nan::Callback *callback, vedis *db, std::string key, Local<Object> &value)
       :AsyncWorker(callback), db(db), key(key) {
-
-
-
         this->buffer = node::Buffer::Data(value);
         this->buffer_length = node::Buffer::Length(value);
-
       }
     ~PutKeyBufferWorker() {}
 
@@ -187,23 +183,15 @@ namespace KVDB {
     Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
     tpl->SetClassName(Nan::New("Database").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-
     Nan::SetPrototypeMethod(tpl, "getKey", GetKey);
     Nan::SetPrototypeMethod(tpl, "getKeyBuffer", GetKeyBuffer);
     Nan::SetPrototypeMethod(tpl, "getKeySync", GetKeySync);
     Nan::SetPrototypeMethod(tpl, "putKey", PutKey);
     Nan::SetPrototypeMethod(tpl, "putKeyBuffer", PutKeyBuffer);
     Nan::SetPrototypeMethod(tpl, "putKeySync", PutKeySync);
-
-
     Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
     Nan::SetAccessor(itpl, Nan::New("db_name").ToLocalChecked(), DbName);
-
-
-
     constructor().Reset(v8::Isolate::GetCurrent(), Nan::GetFunction(tpl).ToLocalChecked());
-
     Nan::Set(target, Nan::New("Database").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
   }
 
