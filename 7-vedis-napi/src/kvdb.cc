@@ -22,10 +22,10 @@
 
 using namespace Napi;
 
-/*class GetKeyWorker: public Napi::AsyncWorker {
+class GetKeyWorker: public Napi::AsyncWorker {
   public:
-    GetKeyWorker(Napi::FunctionReference *callback, vedis *db, std::string cmd )
-      :AsyncWorker(callback), db(db), cmd(cmd) {}
+    GetKeyWorker(Napi::Function& callback, vedis *db, std::string cmd)
+      :Napi::AsyncWorker(callback), db(db), cmd(cmd) {}
     ~GetKeyWorker() {}
 
     void Execute() {
@@ -42,23 +42,20 @@ using namespace Napi;
     }
 
     void OnOK() {
-      Napi::HandleScope();
-      int argc = 2;
-      Napi::Value argv[2];
-      argv[0] = env.Null();
-      argv[1] = Napi::New(env, value);
-      callback->Call(argc, argv);
+      Napi::HandleScope scope(Env()); 
+      Callback().Call(Env().Global(), { Env().Null(), Napi::String::New(Env(), value) });
     }
 
   private:
     vedis *db; 
     std::string cmd;
     const char *value;
-};*/
+};
 
 class PutKeyWorker: public Napi::AsyncWorker {
   public:
-    PutKeyWorker(Napi::FunctionReference *callback) : Napi::AsyncWorker(callback) {}
+    PutKeyWorker(Napi::Function& callback, vedis *db, std::string cmd) 
+      :Napi::AsyncWorker(callback), db(db), cmd(cmd) {}
     ~PutKeyWorker() {}
 
     void Execute() {
@@ -70,11 +67,8 @@ class PutKeyWorker: public Napi::AsyncWorker {
     }
 
     void OnOK() {
-      /*Napi::HandleScope();
-      int argc = 1;
-      Napi::Value argv[1];
-      argv[0] = env.Null();
-      callback->Call(argc, argv);*/
+      Napi::HandleScope scope(Env()); 
+      Callback().Call(Env().Global(), { Env().Null() });
     }
 
   private:
@@ -180,8 +174,6 @@ class PutKeyWorker: public Napi::AsyncWorker {
 namespace KVDB {
 
   Napi::Object Database::Init(Napi::Env env, Napi::Object exports) {
-    //Napi::FunctionReference tpl = Napi::Function::New(env, New);
-    //tpl->SetClassName(Napi::String::New(env, "Database"));
     Napi::Function tpl = DefineClass(env, "Database", {
       InstanceMethod("getKeySync", &Database::GetKeySync),
       InstanceMethod("putKeySync", &Database::PutKeySync),
@@ -191,32 +183,28 @@ namespace KVDB {
     });
 
       
-      //InstanceMethod("getKeyBuffer", &GetKeyBuffer),
-      //InstanceMethod("getKeySync", &GetKeySync),
-      //InstanceMethod("putKey", &PutKey),
-      //InstanceMethod("putKeyBuffer", &PutKeyBuffer),
-      //InstanceMethod("putKeySync", &PutKeySync),
-    // Only if you have accessor method
-    //Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
-    //Napi::SetAccessor(itpl, Napi::String::New(env, "db_name"), DbName);
-    //constructor().Reset(v8::Isolate::GetCurrent(), Napi::GetFunction(tpl));
+    //InstanceMethod("getKeyBuffer", &GetKeyBuffer),
+      
+      
+    //InstanceMethod("putKeyBuffer", &PutKeyBuffer),
+     
     constructor = Napi::Persistent(tpl);
     constructor.SuppressDestruct();
     exports.Set("Database", tpl);
     return exports;
   }
 
-  /*Napi::Value Database::GetKey(const Napi::CallbackInfo& info) {
+  Napi::Value Database::GetKey(const Napi::CallbackInfo& info) {
       // Here we need some control
-      Napi::String tmpKey(env, info[0].ToString());
-      Napi::FunctionReference *callback = new Napi::FunctionReference(info[1].As<Napi::Function>());
-      std::string key(*tmpKey);
+      Napi::String tmpKey = info[0].As<Napi::String>();
+      std::string key = tmpKey.ToString();
       std::stringstream cmd;
       cmd << "GET " + key;
-      KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
-      AsyncQueueWorker(new GetKeyWorker(callback, database->db, cmd.str()));
-      return env.Undefined();
-  }*/
+      Napi::Function callback = info[2].As<Napi::Function>();
+      GetKeyWorker* work = new GetKeyWorker(callback, this->db, cmd.str());
+      work->Queue();
+      return info.Env().Undefined();
+  }
 
   /*Napi::Value Database::GetKeyBuffer(const Napi::CallbackInfo& info) {
     // Here we need some control
@@ -259,9 +247,8 @@ namespace KVDB {
     std::string value = tmpValue.ToString();
     std::stringstream cmd;
     cmd << "SET " + key + " '" + value + "'";
-    Napi::Function callback = new Napi::Function(info[2].As<Napi::Function>());
-    //KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
-    PutKeyWorker* work = new PutKeyWorker(callback);
+    Napi::Function callback = info[2].As<Napi::Function>();
+    PutKeyWorker* work = new PutKeyWorker(callback, this->db, cmd.str());
     work->Queue();
     return info.Env().Undefined();
  }
@@ -289,7 +276,6 @@ namespace KVDB {
     std::string value = tmpValue.ToString();
     std::stringstream cmd;
     cmd << "SET " + key + " '" + value + "'";
-    //KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
     int rc;
     rc = vedis_exec(this->db, (cmd.str()).c_str(), -1);
     if (rc != VEDIS_OK) {
@@ -299,14 +285,9 @@ namespace KVDB {
   }
 
   Napi::Value Database::DbName(const Napi::CallbackInfo& info) {
-    //KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
     return Napi::String::New(info.Env(), this->db_name);
   }
   
-  /*inline Persistent<v8::Function> & Database::constructor() {
-    static Persistent<v8::Function> kvdb_constructor;
-    return kvdb_constructor;
-  }*/
   Napi::FunctionReference Database::constructor;
 
   Database::Database(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Database>(info) {
