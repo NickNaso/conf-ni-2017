@@ -32,13 +32,12 @@ namespace KVDB {
         public: 
             static Napi::Object Init(Napi::Env env, Napi::Object exports);
             explicit Database(const Napi::CallbackInfo& info);
-            ~Database();
-            
+            ~Database(); 
             Napi::Value GetKey(const Napi::CallbackInfo& info);
-            //static Napi::Value GetKeyBuffer(const Napi::CallbackInfo& info);
+            Napi::Value GetKeyBuffer(const Napi::CallbackInfo& info);
             Napi::Value GetKeySync(const Napi::CallbackInfo& info);
             Napi::Value PutKey(const Napi::CallbackInfo& info);
-            //static Napi::Value PutKeyBuffer(const Napi::CallbackInfo& info);
+            Napi::Value PutKeyBuffer(const Napi::CallbackInfo& info);
             Napi::Value PutKeySync(const Napi::CallbackInfo& info);
             Napi::Value DbName(const Napi::CallbackInfo& info);
         private:  
