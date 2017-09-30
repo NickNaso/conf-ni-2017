@@ -22,7 +22,7 @@
 
 using namespace Napi;
 
-class GetKeyWorker: public Napi::AsyncWorker {
+/*class GetKeyWorker: public Napi::AsyncWorker {
   public:
     GetKeyWorker(Napi::FunctionReference *callback, vedis *db, std::string cmd )
       :AsyncWorker(callback), db(db), cmd(cmd) {}
@@ -34,10 +34,10 @@ class GetKeyWorker: public Napi::AsyncWorker {
       if(rc != VEDIS_OK) { 
         // Handle error
       } 
-      /* Extract the return value of the last executed command (i.e. 'GET test') " */
+      // Extract the return value of the last executed command (i.e. 'GET test') " 
       vedis_value *result;
       vedis_exec_result(db, &result);
-      /* Cast the vedis object to a string */
+      //Cast the vedis object to a string 
       value = vedis_value_to_string(result, 0);
     }
 
@@ -54,12 +54,11 @@ class GetKeyWorker: public Napi::AsyncWorker {
     vedis *db; 
     std::string cmd;
     const char *value;
-};
+};*/
 
 class PutKeyWorker: public Napi::AsyncWorker {
   public:
-    PutKeyWorker(Napi::FunctionReference *callback, vedis *db, std::string cmd)
-      :AsyncWorker(callback), db(db), cmd(cmd) {}
+    PutKeyWorker(Napi::FunctionReference *callback) : Napi::AsyncWorker(callback) {}
     ~PutKeyWorker() {}
 
     void Execute() {
@@ -71,11 +70,11 @@ class PutKeyWorker: public Napi::AsyncWorker {
     }
 
     void OnOK() {
-      Napi::HandleScope();
+      /*Napi::HandleScope();
       int argc = 1;
       Napi::Value argv[1];
       argv[0] = env.Null();
-      callback->Call(argc, argv);
+      callback->Call(argc, argv);*/
     }
 
   private:
@@ -83,11 +82,11 @@ class PutKeyWorker: public Napi::AsyncWorker {
     std::string cmd; 
 };
 
-void buffer_delete_callback(char* data, void* hint) {
+/*void buffer_delete_callback(char* data, void* hint) {
   free(data);
-}
+}*/
 
-class GetKeyBufferWorker: public Napi::AsyncWorker {
+/*class GetKeyBufferWorker: public Napi::AsyncWorker {
   public:
     GetKeyBufferWorker(Napi::FunctionReference *callback, vedis *db, std::string key)
       :AsyncWorker(callback), db(db), key(key) {}
@@ -102,10 +101,10 @@ class GetKeyBufferWorker: public Napi::AsyncWorker {
       if(rc != VEDIS_OK) { 
         // Handle error
       }
-      /* Extract the return value of the last executed command (i.e. 'STRLEN test') " */
+      // Extract the return value of the last executed command (i.e. 'STRLEN test') "
       vedis_value *strlen_result;
       vedis_exec_result(db, &strlen_result);
-      /* Cast the vedis object to a string */
+      // Cast the vedis object to a string 
       this->buffer_length = vedis_value_to_int(strlen_result); 
 
       std::stringstream get_cmd;
@@ -114,10 +113,10 @@ class GetKeyBufferWorker: public Napi::AsyncWorker {
       if(rc != VEDIS_OK) { 
         // Handle error
       } 
-      /* Extract the return value of the last executed command (i.e. 'GET test') " */
+      // Extract the return value of the last executed command (i.e. 'GET test') " 
       vedis_value *get_result;
       vedis_exec_result(db, &get_result);
-      /* Cast the vedis object to a string */
+      // Cast the vedis object to a string 
       this->buffer = static_cast<char *>(malloc(this->buffer_length));
       this->buffer = const_cast<char *>(vedis_value_to_string(get_result, 0));
       
@@ -142,9 +141,9 @@ class GetKeyBufferWorker: public Napi::AsyncWorker {
     std::string key;
     char *buffer;
     int buffer_length;
-};
+};*/
 
-class PutKeyBufferWorker: public Napi::AsyncWorker {
+/*class PutKeyBufferWorker: public Napi::AsyncWorker {
   public:
     PutKeyBufferWorker(Napi::FunctionReference *callback, vedis *db, std::string key, Napi::Object &value)
       :AsyncWorker(callback), db(db), key(key) {
@@ -176,44 +175,38 @@ class PutKeyBufferWorker: public Napi::AsyncWorker {
     std::string key; 
     char *buffer;
     int buffer_length;
-};
+};*/
 
 namespace KVDB {
 
-  void Database::Init(Napi::Env env, Napi::Object exports, Napi::Object module) {
-    Napi::FunctionReference tpl = Napi::Function::New(env, New);
-    tpl->SetClassName(Napi::String::New(env, "Database"));
+  Napi::Object Database::Init(Napi::Env env, Napi::Object exports) {
+    //Napi::FunctionReference tpl = Napi::Function::New(env, New);
+    //tpl->SetClassName(Napi::String::New(env, "Database"));
+    Napi::Function tpl = DefineClass(env, "Database", {
+      InstanceMethod("getKeySync", &Database::GetKeySync),
+      InstanceMethod("putKeySync", &Database::PutKeySync),
+      InstanceAccessor("db_name", &Database::DbName, nullptr),
+      InstanceMethod("getKey", &Database::GetKey),
+      InstanceMethod("putKey", &Database::PutKey)
+    });
 
-      InstanceMethod("getKey", &GetKey),
-      InstanceMethod("getKeyBuffer", &GetKeyBuffer),
-      InstanceMethod("getKeySync", &GetKeySync),
-      InstanceMethod("putKey", &PutKey),
-      InstanceMethod("putKeyBuffer", &PutKeyBuffer),
-      InstanceMethod("putKeySync", &PutKeySync),
+      
+      //InstanceMethod("getKeyBuffer", &GetKeyBuffer),
+      //InstanceMethod("getKeySync", &GetKeySync),
+      //InstanceMethod("putKey", &PutKey),
+      //InstanceMethod("putKeyBuffer", &PutKeyBuffer),
+      //InstanceMethod("putKeySync", &PutKeySync),
     // Only if you have accessor method
-    Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
-    Napi::SetAccessor(itpl, Napi::String::New(env, "db_name"), DbName);
+    //Local<ObjectTemplate> itpl = tpl->InstanceTemplate();
+    //Napi::SetAccessor(itpl, Napi::String::New(env, "db_name"), DbName);
     //constructor().Reset(v8::Isolate::GetCurrent(), Napi::GetFunction(tpl));
-    (target).Set(Napi::String::New(env, "Database"), Napi::GetFunction(tpl));
+    constructor = Napi::Persistent(tpl);
+    constructor.SuppressDestruct();
+    exports.Set("Database", tpl);
+    return exports;
   }
 
-  Napi::Value Database::New(const Napi::CallbackInfo& info) {
-    // Here we need some control 
-    Napi::String tmpDbName(env, info[0].ToString());
-    std::string dbName(*tmpDbName);
-    if (info.IsConstructCall()) {
-      KVDB::Database *database = new KVDB::Database(dbName);
-      database->Wrap(info.This());
-      return info.This();
-    } else {
-      const int argc = 1;
-      Napi::Value argv[argc] = {info[0]};
-      Napi::Function cons = Napi::New(env, constructor());
-      return Napi::NewInstance(cons, argc, argv);
-    }   
-  }
-
-  Napi::Value Database::GetKey(const Napi::CallbackInfo& info) {
+  /*Napi::Value Database::GetKey(const Napi::CallbackInfo& info) {
       // Here we need some control
       Napi::String tmpKey(env, info[0].ToString());
       Napi::FunctionReference *callback = new Napi::FunctionReference(info[1].As<Napi::Function>());
@@ -223,9 +216,9 @@ namespace KVDB {
       KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
       AsyncQueueWorker(new GetKeyWorker(callback, database->db, cmd.str()));
       return env.Undefined();
-  }
+  }*/
 
-  Napi::Value Database::GetKeyBuffer(const Napi::CallbackInfo& info) {
+  /*Napi::Value Database::GetKeyBuffer(const Napi::CallbackInfo& info) {
     // Here we need some control
     Napi::String tmpKey(env, info[0].ToString());
     Napi::FunctionReference *callback = new Napi::FunctionReference(info[1].As<Napi::Function>());
@@ -235,44 +228,45 @@ namespace KVDB {
     KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
     AsyncQueueWorker(new GetKeyBufferWorker(callback, database->db, key));
     return env.Undefined();
-  }
+  }*/
 
   Napi::Value Database::GetKeySync(const Napi::CallbackInfo& info) {
     // Here we need some control
-    Napi::String tmpKey(env, info[0].ToString());
-    std::string key(*tmpKey);
+    Napi::String tmpKey = info[0].As<Napi::String>();
+    std::string  key =  tmpKey.ToString();
     std::stringstream cmd;
     cmd << "GET " + key;
-    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    //KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
     int rc;
-    rc = vedis_exec(database->db, (cmd.str()).c_str(), -1);
+    rc = vedis_exec(this->db, (cmd.str()).c_str(), -1);
     if(rc != VEDIS_OK) { 
       // Handle error
     } 
-    /* Extract the return value of the last executed command (i.e. 'GET test') " */
+    // Extract the return value of the last executed command (i.e. 'GET test') " 
     vedis_value *result;
-    vedis_exec_result(database->db, &result);
+    vedis_exec_result(this->db, &result);
     const char *value;
-    /* Cast the vedis object to a string */
+    // Cast the vedis object to a string 
     value = vedis_value_to_string(result, 0);
-    return Napi::New(env, value);
+    return Napi::String::New(info.Env(), value);
   }
 
   Napi::Value Database::PutKey(const Napi::CallbackInfo& info) {
     // Here we need some control
-    Napi::String tmpKey(env, info[0].ToString());
-    std::string key(*tmpKey);
-    Napi::String tmpValue(env, info[1].ToString());
-    std::string value(*tmpValue);
+    Napi::String tmpKey = info[0].As<Napi::String>();
+    std::string key = tmpKey.ToString();
+    Napi::String tmpValue = info[1].As<Napi::String>();
+    std::string value = tmpValue.ToString();
     std::stringstream cmd;
     cmd << "SET " + key + " '" + value + "'";
-    Napi::FunctionReference *callback = new Napi::FunctionReference(info[2].As<Napi::Function>());
-    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
-    AsyncQueueWorker(new PutKeyWorker(callback, database->db, cmd.str()));
-    return env.Undefined();
+    Napi::Function callback = new Napi::Function(info[2].As<Napi::Function>());
+    //KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    PutKeyWorker* work = new PutKeyWorker(callback);
+    work->Queue();
+    return info.Env().Undefined();
  }
 
-  Napi::Value Database::PutKeyBuffer(const Napi::CallbackInfo& info) {
+  /*Napi::Value Database::PutKeyBuffer(const Napi::CallbackInfo& info) {
      // Here we need some control
      Napi::String tmpKey(env, info[0].ToString());
      std::string key(*tmpKey);
@@ -285,50 +279,50 @@ namespace KVDB {
      KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
      AsyncQueueWorker(new PutKeyBufferWorker(callback, database->db, key, value));
      return env.Undefined();
-  }
+  }*/
 
   Napi::Value Database::PutKeySync(const Napi::CallbackInfo& info) {
     // Here we need some control
-    Napi::String tmpKey(env, info[0].ToString());
-    std::string key(*tmpKey);
-    Napi::String tmpValue(env, info[1].ToString());
-    std::string value(*tmpValue);
+    Napi::String tmpKey = info[0].As<Napi::String>();
+    std::string  key =  tmpKey.ToString();
+    Napi::String tmpValue = info[1].As<Napi::String>();
+    std::string value = tmpValue.ToString();
     std::stringstream cmd;
     cmd << "SET " + key + " '" + value + "'";
-    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    //KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
     int rc;
-    rc = vedis_exec(database->db, (cmd.str()).c_str(), -1);
+    rc = vedis_exec(this->db, (cmd.str()).c_str(), -1);
     if (rc != VEDIS_OK) {
       // Hanlde  error
     }
-    return env.Undefined();
+    return info.Env().Undefined();
   }
 
   Napi::Value Database::DbName(const Napi::CallbackInfo& info) {
-    KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
-    return Napi::New(env, database->db_name);
+    //KVDB::Database* database = ObjectWrap::Unwrap<KVDB::Database>(info.This());
+    return Napi::String::New(info.Env(), this->db_name);
   }
   
   /*inline Persistent<v8::Function> & Database::constructor() {
     static Persistent<v8::Function> kvdb_constructor;
     return kvdb_constructor;
   }*/
+  Napi::FunctionReference Database::constructor;
 
-  Database::Database(std::string db_name) {
-    this->db_name = db_name;
+  Database::Database(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Database>(info) {
+    this->db_name = info[0].As<Napi::String>();
     std::stringstream db_path;
     db_path << root_path << "/" << db_name << db_extension;
-    int r;
-    uv_fs_t req;
-    uv_stat_t* s;
-    r = uv_fs_stat(uv_, &req, db_path, NULL);
-    if (r = 0) {
-      std::cout << "uv_fs_stat 0";
-    } 
-
     int rc;
     rc = vedis_open(&(this->db), (db_path.str()).c_str());
     //rc = vedis_open(&(this->db), NULL);
+    int r;
+    uv_fs_t req;
+    r = uv_fs_mkdir(NULL, &req, root_path.c_str(), 0777, NULL);
+    if (r != 0) {
+      // Handle create root folder error
+    } 
+    uv_fs_req_cleanup(&req);
     if (rc != VEDIS_OK) {
       // Hanlde the initialization error
     }

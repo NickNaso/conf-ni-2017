@@ -324,9 +324,6 @@ namespace KVDB {
     this->db_name = db_name;
     std::stringstream db_path;
     db_path << root_path << "/" << db_name << db_extension;
-    int rc;
-    rc = vedis_open(&(this->db), (db_path.str()).c_str());
-    //rc = vedis_open(&(this->db), NULL);
     int r;
     uv_fs_t req;
     r = uv_fs_mkdir(NULL, &req, root_path.c_str(), 0777, NULL);
@@ -334,6 +331,9 @@ namespace KVDB {
       // Handle create root folder error
     } 
     uv_fs_req_cleanup(&req);
+    int rc;
+    rc = vedis_open(&(this->db), (db_path.str()).c_str());
+    //rc = vedis_open(&(this->db), NULL);
     if (rc != VEDIS_OK) {
       // Hanlde the initialization error
     }

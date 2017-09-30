@@ -30,21 +30,21 @@ namespace KVDB {
 
     class Database : public Napi::ObjectWrap<Database> {
         public: 
-            static void Init(Napi::Env env, Napi::Object exports, Napi::Object module);
-            static Napi::Value New(const Napi::CallbackInfo& info);
-            static Napi::Value GetKey(const Napi::CallbackInfo& info);
-            static Napi::Value GetKeyBuffer(const Napi::CallbackInfo& info);
-            static Napi::Value GetKeySync(const Napi::CallbackInfo& info);
-            static Napi::Value PutKey(const Napi::CallbackInfo& info);
-            static Napi::Value PutKeyBuffer(const Napi::CallbackInfo& info);
-            static Napi::Value PutKeySync(const Napi::CallbackInfo& info);
-            Napi::Value DbName(const Napi::CallbackInfo& info);
-        private:
-            Database(std::string db_name);
+            static Napi::Object Init(Napi::Env env, Napi::Object exports);
+            explicit Database(const Napi::CallbackInfo& info);
             ~Database();
+            
+            Napi::Value GetKey(const Napi::CallbackInfo& info);
+            //static Napi::Value GetKeyBuffer(const Napi::CallbackInfo& info);
+            Napi::Value GetKeySync(const Napi::CallbackInfo& info);
+            Napi::Value PutKey(const Napi::CallbackInfo& info);
+            //static Napi::Value PutKeyBuffer(const Napi::CallbackInfo& info);
+            Napi::Value PutKeySync(const Napi::CallbackInfo& info);
+            Napi::Value DbName(const Napi::CallbackInfo& info);
+        private:  
             std::string db_name;
             vedis *db;
-            //static inline Persistent<v8::Function> & constructor();
+            static Napi::FunctionReference constructor;
     };
 
     static std::string root_path = "./tmp";

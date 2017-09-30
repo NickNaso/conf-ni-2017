@@ -17,11 +17,12 @@
  ******************************************************************************/
 
 #include <napi.h>
-#include <uv.h>
 #include "kvdb.h"
 
-void Init(Napi::Env env, Napi::Object exports, Napi::Object module) {
-    KVDB::Database::Init(env, exports, module);
-}
+  
+  Napi::Object Init(Napi::Env env, Napi::Object exports) {
+    KVDB::Database::Init(env, exports);
+    return exports;
+  }
 
 NODE_API_MODULE(kvdb, Init)
