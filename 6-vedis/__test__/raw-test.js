@@ -25,32 +25,22 @@ console.log(Database)
 process.chdir(__dirname)
 
 const mydb = new Database('test')
-
-mydb.db_name
-
+console.log(mydb.db_name)
 mydb.putKeySync('username', 'NickNaso')
-mydb.getKeySync('username')
-
-mydb.getKey('username', function(err, value) {
-    if (err) {
-        console.error(err)
-    } else {
-        console.log('Value from my async API')
-        console.log(value)
-    }
-})
-
-mydb.putKey('password', 'keeplooking', function (err) {
-    if (err) {
-        console.error(err)
-    } else {
-        console.log("Value stored")
-    }
-})
-
+console.log(mydb.getKeySync('username'))
 
 const mydb2 = Database('test2');
 console.log(mydb2.db_name)
 mydb2.putKeySync("username", "NickNaso");
 console.log(mydb2.getKeySync("username"));
+
+mydb.getKey('username', function (err, value) {
+    if (err) {
+        console.log('Error')
+        console.log(err)
+    } else {
+        console.log('Value from asynnc function')
+        console.log(value)
+    }
+})
 
