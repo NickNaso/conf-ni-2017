@@ -35,6 +35,7 @@
 * **[N-API Next generation Node API for native modules](https://www.slideshare.net/michaeldawson3572846/n-apinode-summit2017final)**
 * **[Start with N-API](https://hackernoon.com/n-api-and-getting-started-with-writing-c-addons-for-node-js-cf061b3eae75)**
 * **[Nodeaddons.com](https://nodeaddons.com/)**
+* **[Building streaming addons with streaming/event-emitter interfaces](https://www.npmjs.com/package/streaming-worker)**
 
 ### Nicola Del Gobbo
 
