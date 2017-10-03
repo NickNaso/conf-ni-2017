@@ -24,13 +24,12 @@ console.log(Database)
 
 process.chdir(__dirname)
 
-
-
-
-
 const mydb = new Database('test')
 
 mydb.db_name
+
+mydb.putKeySync('username', 'NickNaso')
+mydb.getKeySync('username')
 
 mydb.getKey('username', function(err, value) {
     if (err) {
@@ -41,17 +40,6 @@ mydb.getKey('username', function(err, value) {
     }
 })
 
-
-
-
-
-
-
-mydb.putKeySync('username', 'NickNaso')
-mydb.getKeySync('username')
-
-
-
 mydb.putKey('password', 'keeplooking', function (err) {
     if (err) {
         console.error(err)
@@ -59,8 +47,6 @@ mydb.putKey('password', 'keeplooking', function (err) {
         console.log("Value stored")
     }
 })
-
-
 
 
 const mydb2 = Database('test2');
