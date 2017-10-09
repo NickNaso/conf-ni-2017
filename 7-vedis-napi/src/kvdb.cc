@@ -43,7 +43,7 @@ class GetKeyWorker: public Napi::AsyncWorker {
 
     void OnOK() {
       Napi::HandleScope scope(Env()); 
-      Callback().Call(Env().Global(), { Env().Null(), Napi::String::New(Env(), value) });
+      Callback().Call({ Env().Null(), Napi::String::New(Env(), value) });
     }
 
   private:
@@ -68,7 +68,7 @@ class PutKeyWorker: public Napi::AsyncWorker {
 
     void OnOK() {
       Napi::HandleScope scope(Env()); 
-      Callback().Call(Env().Global(), { Env().Null() });
+      Callback().Call({ Env().Null() });
     }
 
   private:
@@ -117,7 +117,7 @@ class GetKeyBufferWorker: public Napi::AsyncWorker {
     void OnOK() {
       Napi::HandleScope scope(Env()); 
       Buffer<char> buffer = Buffer<char>::New(Env(), this->buffer, this->buffer_length, buffer_delete_callback);
-      Callback().Call(Env().Global(), { Env().Null(), buffer});
+      Callback().Call({ Env().Null(), buffer});
     }
 
   private:
@@ -148,7 +148,7 @@ class PutKeyBufferWorker: public Napi::AsyncWorker {
 
     void OnOK() {
       Napi::HandleScope scope(Env()); 
-      Callback().Call(Env().Global(), { Env().Null() });
+      Callback().Call({ Env().Null() });
     }
 
   private:
